@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>KSDP JS 0x02 Homework</title>
+    <meta name="viewport" content="initial-scale=1,width=device-width" />
+    <script language="application/x-template" id="levels">
+/*
+ * Hello!
+ * 这是一个课后的简单作业，改编自 https://github.com/AlexNisnevich/untrusted
+ * 红色部分不可修改，黑色部分可以修改
+ * `level.setResult` 会将此题标记为传入的参数
+ * 若传入参数为`true`则通过
+ * 点击下面的“运行”来开始吧！
+ *
+ * @author Alan-Liang, AlexNisnevich
+ */
+
+player.setName(<{> null <}>)
+<edit>
+
+var arr = []
+
+</edit>
+;level.setResult(arr[2])
+|||
+//注意体会`this`的作用
+level.banWords('level')
+var setR = (level.<{> setResult <}>)
+// P.S. 记得逗号运算符吗？或者`||`的一种特殊用法？
+// P.P.S. 函数表达式是`function name(args) {...}`
+setR(false)
+|||
+<edit>
+
+var res = {
+  'result': 'this is useless'
+}
+
+</edit>
+;level.setResult(res.foo)
+|||
+//体会prototype的作用
+function Foo() {}
+<edit>
+
+
+
+</edit>
+;var bar = new Foo()
+level.setResult(bar.baz)
+|||
+/* const是即将讲到的语法
+ * 即setResult这个变量不能更改
+ * P.S. 注意体会ASI的作用
+ * P.P.S. `&&`的特殊用法还记得吗？
+ */
+
+const setResult = level.setResult.bind(level)
+<edit>
+
+
+
+</edit>
+setResult(false)
+|||
+/*
+ * 到这里就结束啦！请截屏发给Alan-Liang
+ * 姓名: {{playerName}}
+ * 下面还有一道附加题，如果有时间可以试一下
+ */
+<edit>
+
+
+
+</edit>
+/* 防止注释破坏 */
+level.banWords('level', 'eval', 'Function')
+|||
+// Good job! 这真的是结束了。
+// 您的姓名: {{playerName}}
+level.setResult(false)
+</script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.44.0/lib/codemirror.css">
+    <link rel="stylesheet" href="./codeeditor.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@material/snackbar@0.44.1/dist/mdc.snackbar.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@material/button@0.44.1/dist/mdc.button.min.css">
+    <link rel="stylesheet" href="https://fonts.loli.net/css?family=Source+Code+Pro">
+    <style>
+    html, head, body {
+      margin: 0;
+    }
+    .mdc-button:disabled {
+      color: rgba(255,255,255,.3);
+    }
+    .CodeMirror {
+      font-family: 'Source Code Pro', monospace;
+    }
+    </style>
+  </head>
+  <body>
+    <textarea id="texts" hidden></textarea>
+    <div id="actions">
+      <button id="last" class="mdc-button">←上一个</button>
+      <button id="run" class="mdc-button mdc-button--raised">▶运行</button>
+      <button id="reset" class="mdc-button">重置</button>
+      <button id="next" class="mdc-button">下一个→</button>
+    </div>
+    <div class="mdc-snackbar" id="snackbar">
+      <div class="mdc-snackbar__surface">
+        <div class="mdc-snackbar__label"
+             role="status"
+             aria-live="polite">
+          Snackbar.
+        </div>
+        <div class="mdc-snackbar__actions">
+          <button type="button" class="mdc-button mdc-snackbar__action">OK</button>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.44.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.44.0/mode/javascript/javascript.js"></script>
+    <script src="./codeeditor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@material/snackbar@0.44.1/dist/mdc.snackbar.min.js"></script>
+    <script>
+    (() => {
+      const $ = sel => document.querySelector(sel)
+
+      const ce = new CodeEditor('texts')
+      const snackbar = new mdc.snackbar.MDCSnackbar($('#snackbar'))
+      const snack = text => {
+        snackbar.labelText = text
+        snackbar.open()
+      }
+
+      const levels = $('#levels').innerHTML.split('|||')
+      const loadLevel = () => {
+        if (current === 0) last.disabled = true
+        else last.disabled = false
+        if (!(`passed${current}` in localStorage)) next.disabled = true
+        else next.disabled = false
+        try {
+          const state = ce.getGoodState(`level${current}`)
+          if (state.endOfStartLevel) {
+            ce.setEndOfStartLevel(state.endOfStartLevel)
+          }
+          if (state.editableLines) {
+            ce.setEditableLines(state.editableLines)
+          }
+          if (state.editableSections) {
+            ce.setEditableSections(state.editableSections)
+          }
+          ce.setCode(state.code)
+        } catch(e) {
+          ce.loadCode(levels[current].replace('{{playerName}}', localStorage.name))
+        }
+      }
+      let current = 0
+      const last = $('#last')
+      const run = $('#run')
+      const reset = $('#reset')
+      const next = $('#next')
+
+      if (localStorage.current) {
+        current = parseInt(localStorage.current)
+        loadLevel()
+      } else {
+        ce.loadCode(levels[0])
+        localStorage.current = 0
+        last.disabled = true
+        next.disabled = true
+      }
+      ce.internalEditor.on('change', () => ce.saveGoodState(`level${current}`))
+
+      reset.onclick = () => {
+        ce.loadCode(levels[current].replace('{{playerName}}', localStorage.name))
+      }
+      run.onclick = () => {
+        const code = ce.getCode()
+        const playerCode = ce.getPlayerCode()
+        try {
+          _eval(code, playerCode)
+        } catch(e) {
+          snack(e)
+          return
+        }
+        localStorage[`passed${current}`] = true
+        next.disabled = false
+        snack('恭喜您，您通过了！点击下一个以继续')
+        fetch('https://log.keeer.net/', {
+          body: `${localStorage.name} passed level ${current}`,
+          method: 'POST',
+          mode: 'cors'
+        })
+      }
+      last.onclick = () => {
+        current--
+        localStorage.current = current
+        loadLevel()
+      }
+      next.onclick = () => {
+        current++
+        localStorage.current = current
+        loadLevel()
+      }
+    })()
+
+    const _eval = (code, playerCode) => {
+      const ce = void(0)
+      const window = ce
+      const document = ce
+      const navigator = ce
+      const history = ce
+      const player = {
+        setName: name => {
+          if(!name) {
+            throw '你的名字不是空吧……'
+          }
+          localStorage.name = name
+        }
+      }
+      const level = {
+        setResult(res) {
+          if (res !== true) {
+            throw '结果不是true…'
+          }
+          if ('result' in this) {
+            throw '不能重复设置结果'
+          }
+          this.result = res
+        },
+        banWords() {
+          const words = arguments
+          for (let i = 0; i < words.length; i++) {
+            const word = words[i]
+            if(playerCode.indexOf(word) > -1) {
+              throw `您使用了违禁词${word}`
+            }
+          }
+        }
+      }
+      eval(code)
+      if (level.result !== true) {
+        throw '没有设置结果'
+      }
+    }
+    </script>
+  </body>
+</html>

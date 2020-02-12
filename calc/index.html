@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <style>
+  body {
+    margin: 16px;
+  }
+  .cursor {
+    border-right: 2px solid black;
+    animation: 1s blink step-end infinite;
+  }
+  @keyframes blink {
+    from, to {
+      border-right: 2px solid black;
+    }
+    50% {
+      border-right: 2px solid transparent;
+    }
+  }
+  td {
+    cursor: pointer;
+    user-select: none;
+    width: 64px;
+    height: 64px;
+    font-size: 32px;
+    text-align: center;
+    border-radius: 4px;
+    background: #f5fafd;
+    border: 1px solid #bbb;
+  }
+  td.word {
+    font-size: 20px;
+  }
+  td.go {
+    background: #002d4d;
+    color: #f5fafd;
+  }
+  #display {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  #display.state {
+    color: red;
+  }
+  </style>
+</head>
+<body>
+  <div id="display"><span class="cursor"></span></div>
+  <div id="controls">
+    <table>
+      <tr>
+        <td onclick="insert('paren')">(</td>
+        <td onclick="insert('rightParen')">)</td>
+        <td onclick="clearChars()">C</td>
+        <td onclick="left()">←</td>
+        <td onclick="right()">→</td>
+      </tr>
+      <tr>
+        <td onclick="insert('7')">7</td>
+        <td onclick="insert('8')">8</td>
+        <td onclick="insert('9')">9</td>
+        <td onclick="insert('plus')">+</td>
+        <td onclick="insert('minus')">-</td>
+      </tr>
+      <tr>
+        <td onclick="insert('4')">4</td>
+        <td onclick="insert('5')">5</td>
+        <td onclick="insert('6')">6</td>
+        <td onclick="insert('times')">×</td>
+        <td onclick="insert('divides')">÷</td>
+      </tr>
+      <tr>
+        <td onclick="insert('1')">1</td>
+        <td onclick="insert('2')">2</td>
+        <td onclick="insert('3')">3</td>
+        <td onclick="insert('power')">^</td>
+        <td onclick="insert('sqrt')">√(</td>
+      </tr>
+      <tr>
+        <td onclick="insert('dot')">.</td>
+        <td onclick="insert('0')">0</td>
+        <td class="word" onclick="insert('ans')">Ans</td>
+        <td class="word" onclick="del()">DEL</td>
+        <td class="go" onclick="go()">=</td>
+      </tr>
+      <tr>
+        <td class="word" onclick="insert('sin')">sin(</td>
+        <td class="word" onclick="insert('cos')">cos(</td>
+        <td class="word" onclick="insert('tan')">tan(</td>
+        <td class="word" onclick="insert('lose')">LOSE</td>
+      </tr>
+    </table>
+  </div>
+  <script src="index.js"></script>
+</body>
+</html>
