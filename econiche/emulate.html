@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emulator</title>
+</head>
+<body>
+  <h1>Tick <span id="tickno"></span></h1>
+  <canvas id="main" width="600" height="600"></canvas>
+  <script>
+  // COMPILED BY BABEL
+  // DO NOT MODIFY
+  // SEE src.js
+
+function _instanceof(left, right) { if (right != null && typeof Symbol !== "undefined" && right[Symbol.hasInstance]) { return !!right[Symbol.hasInstance](left); } else { return left instanceof right; } }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+function _classCallCheck(instance, Constructor) { if (!_instanceof(instance, Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var params = new URLSearchParams(location.search);
+var communism = params.get('communism') !== null,
+    spacial = params.get('spacial') !== null,
+    onlyEatMain = params.get('only-eat-main') !== null ? .5 : false,
+    imbalance = params.get('imbalance') !== null;
+
+var rand = function rand(max) {
+  return Math.floor(Math.random() * max);
+};
+
+var canvas = document.getElementById('main');
+var ctx = canvas.getContext('2d');
+var width = 10,
+    height = 10,
+    cWidth = 600,
+    cHeight = 600,
+    initialCount = [50, 50],
+    resUpdate = communism ? [10, 10, 10] : spacial ? [.99, .99, .99] : [.8, .8, .8],
+    maxRes = communism ? [10, 10, 10] : [2, 2, 2],
+    uses = [[0, 1], [1, 2]],
+    initialE = imbalance ? [2, 10] : [10, 10],
+    maxE = imbalance ? [2, 10] : [10, 10],
+    usability = imbalance ? [1.03, 1.5] : [1.1, 1.1],
+    thresholdE = imbalance ? [3, 5] : [5, 5],
+    thresholdU = [0., 0.],
+    fillStyles = ['red', 'blue'],
+    fillResStyles = ['rgb(64,255,64)', 'rgb(255,255,64)', 'rgb(64,255,255)'],
+    noneStyle = 'white';
+
+function shuffle(array) {
+  var currentIndex = array.length,
+      temporaryValue,
+      randomIndex; // While there remain elements to shuffle...
+
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1; // And swap it with the current element.
+
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+var res = Array(width).fill(null).map(function () {
+  return Array(height).fill(null).map(function () {
+    return Array(resUpdate.length).fill(0);
+  });
+});
+
+var refreshRes = function refreshRes() {
+  return res = res.map(function (r, x) {
+    return r.map(function (r1) {
+      return r1.map(function (o, i) {
+        if (spacial) {
+          if (x < 4 && i === 0) return o;
+          if (x === 4 && i === 0) return Math.min(maxRes[i] / 2, o + resUpdate[i] / 2);
+          if (x > 6 && i === 2) return o;
+          if (x === 6 && i === 2) return Math.min(maxRes[i] / 2, o + resUpdate[i] / 2);
+          if ((x < 4 || x > 6) && i === 1) return o;
+        }
+
+        return Math.min(maxRes[i], o + resUpdate[i]);
+      });
+    });
+  });
+};
+
+refreshRes();
+
+var Individual =
+/*#__PURE__*/
+function () {
+  function Individual(type) {
+    _classCallCheck(this, Individual);
+
+    this.type = type;
+    this.pos = [rand(width), rand(height)];
+    this.energy = initialE[type] + rand(5) - 2;
+    this._uses = shuffle(_toConsumableArray(uses[type]));
+    this.usability = usability[type];
+    this.maxEnergy = maxE[type];
+    this.thresholdE = thresholdE[type];
+    this.thresholdU = thresholdU[type];
+    this.used = Array(resUpdate.length).fill(0);
+  }
+
+  _createClass(Individual, [{
+    key: "willContinueEat",
+    value: function willContinueEat(usability) {
+      if (usability < this.thresholdU) return false;
+      if (this.energy > this.thresholdE) return false;
+      return true;
+    }
+  }, {
+    key: "uses",
+    get: function get() {
+      var _this = this;
+
+      return this._uses.sort(function (a, b) {
+        return _this.used[b] - _this.used[a];
+      });
+    }
+  }, {
+    key: "alive",
+    get: function get() {
+      return this.energy > 0;
+    }
+  }]);
+
+  return Individual;
+}();
+
+var individuals = initialCount.map(function (c, i) {
+  return Array(c).fill(null).map(function () {
+    return new Individual(i);
+  });
+}).flat();
+var currentTick = 0;
+
+var tick = function tick() {
+  refreshRes();
+  shuffle(individuals).forEach(function (ind) {
+    ind.energy--;
+    if (ind.energy > ind.maxEnergy) return;
+
+    var processRes = function processRes(resData) {
+      var usabilityLeft = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ind.usability;
+      var i = 0;
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = (onlyEatMain && resData[ind.uses[0]] > onlyEatMain ? [ind.uses[0]] : ind.uses)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var u = _step.value;
+
+          if (resData[u] > 0) {
+            var consume = Math.min(resData[u], usabilityLeft);
+            if (u !== ind.uses[0]) consume /= 8;
+            resData[u] -= consume;
+            ind.energy += consume;
+            ind.used[u] += consume;
+            usabilityLeft -= consume;
+          }
+
+          if (!ind.willContinueEat(usabilityLeft)) break;
+          i++;
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return usabilityLeft;
+    };
+
+    var usabilityLeft = processRes(res[ind.pos[0]][ind.pos[1]]);
+
+    if (ind.willContinueEat(usabilityLeft)) {
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = shuffle([[(res[ind.pos[0] + 1] || [])[ind.pos[1]], 1, 0], [res[ind.pos[0]][ind.pos[1] + 1], 0, 1], [res[ind.pos[0]][ind.pos[1] - 1], 0, -1], [(res[ind.pos[0] - 1] || [])[ind.pos[1]], -1, 0]]).filter(function (x) {
+          return !!x[0];
+        })[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          d = _step2.value;
+          if (individuals.find(function (ind2) {
+            return ind2.pos[0] === ind.pos[0] + d[1] && ind2.pos[1] === ind.pos[1] + d[2] && ind.type === ind2.type;
+          })) break;
+
+          if (!ind.willContinueEat(usabilityLeft -= processRes(d[0], usabilityLeft))) {
+            ind.pos[0] += d[1];
+            ind.pos[1] += d[2];
+            break;
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+            _iterator2["return"]();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+    }
+  });
+  individuals = individuals.filter(function (x) {
+    return x.alive;
+  });
+  var xMag = cWidth / width / 4,
+      yMag = cHeight / height / 4;
+  var _iteratorNormalCompletion3 = true;
+  var _didIteratorError3 = false;
+  var _iteratorError3 = undefined;
+
+  try {
+    var _loop = function _loop() {
+      var i = _step3.value;
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        var _loop2 = function _loop2() {
+          var j = _step4.value;
+          var xPos = xMag * 4 * i,
+              yPos = yMag * 4 * j;
+          var _iteratorNormalCompletion5 = true;
+          var _didIteratorError5 = false;
+          var _iteratorError5 = undefined;
+
+          try {
+            var _loop3 = function _loop3() {
+              var k = _step5.value;
+              ctx.fillStyle = individuals.find(function (ind) {
+                return ind.pos[0] === i && ind.pos[1] === j && ind.type === k;
+              }) ? fillStyles[k] : noneStyle;
+              ctx.fillRect(xPos + k * xMag, yPos, yMag, xMag);
+              ctx.fillStyle = individuals.filter(function (ind) {
+                return ind.pos[0] === i && ind.pos[1] === j && ind.type === k;
+              }).map(function (i) {
+                return fillResStyles[i.uses[0]];
+              })[0] || noneStyle;
+              ctx.fillRect(xPos + k * xMag, yPos, yMag / 2, xMag / 2);
+            };
+
+            for (var _iterator5 = initialCount.keys()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+              _loop3();
+            }
+          } catch (err) {
+            _didIteratorError5 = true;
+            _iteratorError5 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+                _iterator5["return"]();
+              }
+            } finally {
+              if (_didIteratorError5) {
+                throw _iteratorError5;
+              }
+            }
+          }
+
+          var _iteratorNormalCompletion6 = true;
+          var _didIteratorError6 = false;
+          var _iteratorError6 = undefined;
+
+          try {
+            for (var _iterator6 = resUpdate.keys()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+              var k = _step6.value;
+              ctx.fillStyle = noneStyle;
+              ctx.fillRect(xPos, yPos + (k + 2) * yMag / 2, 2 * xMag, yMag / 2);
+              ctx.fillStyle = fillResStyles[k];
+              ctx.fillRect(xPos, yPos + (k + 2) * yMag / 2, 2 * xMag * res[i][j][k] / maxRes[k], yMag / 2);
+            }
+          } catch (err) {
+            _didIteratorError6 = true;
+            _iteratorError6 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+                _iterator6["return"]();
+              }
+            } finally {
+              if (_didIteratorError6) {
+                throw _iteratorError6;
+              }
+            }
+          }
+        };
+
+        for (var _iterator4 = Array(height).keys()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          _loop2();
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+            _iterator4["return"]();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+    };
+
+    for (var _iterator3 = Array(width).keys()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+      _loop();
+    }
+  } catch (err) {
+    _didIteratorError3 = true;
+    _iteratorError3 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+        _iterator3["return"]();
+      }
+    } finally {
+      if (_didIteratorError3) {
+        throw _iteratorError3;
+      }
+    }
+  }
+
+  return currentTick++;
+};
+
+var tickno = document.getElementById('tickno');
+var iid;
+
+var resume = function resume() {
+  return iid = setInterval(function () {
+    return tickno.innerText = tick();
+  }, 1);
+};
+
+var pause = function pause() {
+  return clearInterval(iid);
+};
+
+resume();
+  </script>
+</body>
+</html>
