@@ -1,82 +1,19 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Timer</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body {
-  margin: 0;
-  height: 100vh;
-  background: black;
-  color: white;
-}
-.red {
-  background: red;
-}
-#disp {
-  padding: 16px;
-  margin-top: 200px;
-  display: inline-block;
-}
-#disp2 {
-  text-align: center;
-}
-#block {
-  width: 128px;
-  height: 128px;
-  position: fixed;
-  top: calc(50vh - 64px);
-  left: calc(50% - 64px);
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer Variants</title>
 </head>
 <body>
-<h2 id="disp">Tap to start</h2>
-<h1 id="disp2"></h1>
-<div id="block"> </div>
-<script>
-var start = null, red = false, last = Date.now(), timeoutId = -1, el = document.body//block
-window.onmousedown = window.ontouchstart = function (e) {
-  if (Date.now() - last < 100) return
-  last = Date.now()
-  e.preventDefault()
-  if (!start) {
-    try { document.documentElement.requestFullscreen() } catch (e) {alert(e)}
-    start = Date.now()
-    disp.innerText = ''
-    timeoutId = setTimeout(function () {
-      red = true
-      start = Date.now()
-      disp.innerText = ' '
-      el.classList.add('red')
-      //navigator.vibrate(100)
-    }, Math.random() * 16000 + 5000)
-    return
-  }
-  el.classList.remove('red')
-  if (!red) {
-    disp.innerText = 'N/A'
-    clearTimeout(timeoutId)
-  } else {
-    disp.innerText = Date.now() - start + 'ms'
-    red = false
-  }
-  start = null
-}
-function q (e) {
-  if (e && Date.now() - last < 100) return
-  last = Date.now()
-  if (e) e.stopPropagation()
-  function rand (max) { return Math.floor(Math.random() * max) }
-  var op = rand(2) ? ' + ' : ' - '
-  var max = 1000000000
-  disp2.innerText = rand(max)
-  //setTimeout(function () { disp2.innerText = op }, 500)
-  //setTimeout(function () { disp2.innerText = rand(max) }, 1000)
-  setTimeout(function () { disp2.innerText = '=' }, 1000)
-}
-disp2.onmousedown = disp2.ontouchstart = q
-if (!!true) q()
-</script>
+  <h2>Variants</h2>
+  <h3>Vibrate:</h3>
+  <a href="timer.html?v=vib">None</a>
+  <a href="timer.html?v=vib+acma">Math</a>
+  <a href="timer.html?v=vib+rem">Memory</a>
+  <h3>Color:</h3>
+  <a href="timer.html?v=red">None</a>
+  <a href="timer.html?v=red+acma">Math</a>
+  <a href="timer.html?v=red+rem">Memory</a>
 </body>
 </html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+<title>Timer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: black;
+  color: white;
+}
+.red {
+  background: red;
+}
+#disp {
+  padding: 16px;
+  margin-top: 200px;
+  display: inline-block;
+}
+#disp2 {
+  text-align: center;
+}
+#block {
+  width: 128px;
+  height: 128px;
+  position: fixed;
+  top: calc(50vh - 64px);
+  left: calc(50% - 64px);
+}
+</style>
+</head>
+<body>
+<h2 id="disp">Tap to start</h2>
+<h1 id="disp2"></h1>
+<div id="block"> </div>
+<script>
+var params = new URLSearchParams(location.search)
+var v = params.get('v')
+if (!v) v = 'vib'
+var start = null, red = false, last = Date.now(), timeoutId = -1, el = document.body//block
+window.onmousedown = window.ontouchstart = function (e) {
+  if (Date.now() - last < 100) return
+  last = Date.now()
+  e.preventDefault()
+  if (!start) {
+    try { document.documentElement.requestFullscreen() } catch (e) {alert(e)}
+    start = Date.now()
+    disp.innerText = ''
+    timeoutId = setTimeout(function () {
+      red = true
+      start = Date.now()
+      disp.innerText = ' '
+      if (v.indexOf('red') > -1) el.classList.add('red')
+      if (v.indexOf('vib') > -1) navigator.vibrate(100)
+    }, Math.random() * 16000 + 5000)
+    return
+  }
+  el.classList.remove('red')
+  if (!red) {
+    disp.innerText = 'N/A'
+    clearTimeout(timeoutId)
+  } else {
+    disp.innerText = Date.now() - start + 'ms'
+    red = false
+  }
+  start = null
+}
+function q (e) {
+  if (e && Date.now() - last < 100) return
+  last = Date.now()
+  if (e) e.stopPropagation()
+  function rand (max) { return Math.floor(Math.random() * max) }
+  var op = rand(2) ? ' + ' : ' - '
+  if (v.indexOf('rem') > -1) {
+    var max = 1000000000
+    disp2.innerText = rand(max)
+    setTimeout(function () { disp2.innerText = '=' }, 1000)
+  } else if (v.indexOf('acma') > -1) {
+    var max = 100
+    disp2.innerText = rand(max)
+    setTimeout(function () { disp2.innerText = op }, 500)
+    setTimeout(function () { disp2.innerText = rand(max) }, 1000)
+    setTimeout(function () { disp2.innerText = '=' }, 1500)
+  } else if (v.indexOf('math') > -1) {
+    var max = 100
+    disp2.innerText = rand(max) + op + rand(max)
+  }
+}
+disp2.onmousedown = disp2.ontouchstart = q
+if (!!true) q()
+</script>
+</body>
+</html>
