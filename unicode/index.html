@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unicode collection</title>
+  <style>
+  body { color: #222; }
+  ul {
+    list-style: none;
+    padding-left: 32px;
+  }
+  #links { font-size: 1.25rem; }
+  li { margin: -2px 0; }
+  li:hover .copy, li:active .copy, li:focus .copy, .copy:focus { opacity: 1; }
+  .copy {
+    position: absolute;
+    left: 4px;
+    opacity: 0;
+    padding: 0 8px;
+    height: 32px;
+    border-radius: 3px;
+    background-color: #dfd;
+    cursor: pointer;
+    transition: all .1s ease;
+    border: 1px solid rgba(0, 0, 0, .2);
+  }
+  .char { font-size: 1.25rem; }
+  .bracket { user-select: none; }
+  .copy:hover, .copy:focus { background-color: #cec; }
+  .copy:active { background-color: #bdb; }
+  </style>
+</head>
+<body>
+  <main>
+    <p id="links">
+      Links:
+      <a href="https://unicode-table.com/en/sets/arrow-symbols/">→←</a> /
+      <a href="https://unicode-table.com/en/sets/check/">✓✗</a> /
+      <a href="https://unicode-table.com/en/sets/mathematical-signs/">+−×÷∑∮ℕ∈</a> /
+      <a href="https://unicode-table.com/en/sets/greek-symbols/">αβγ</a> /
+      <a href="https://unicode-table.com/en/sets/currency-symbols/">¥₿$</a> /
+      <a href="https://unicode-table.com/en/sets/superscript-and-subscript-numbers/">¹₂³₄</a> /
+      <a href="https://fancyunicode.com/">𝚏𝙖𝘯𝖈𝔂</a>
+    </p>
+    <div id="app">
+      Search: <input v-model="search">
+      <ul>
+        <li v-for="name in Object.keys(codesToShow)">
+          <button class="copy" @click="copyCodePoint(codes[name])">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#222" width="18px" height="18px" style="position: relative; top: 3px;"><path d="M0 0h24v24H0z" fill="none"/><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          </button><!--
+       --><span class="bracket">「</span><!--
+       --><span class="char" dir="ltr">{{ String.fromCodePoint(codes[name]) }}</span><!--
+       --><span class="bracket">」</span>
+          U+{{ codes[name].toString(16).toUpperCase().padStart(4, '0') }} {{ name }}
+        </li>
+      </ul>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+  <script>
+    const codes = {
+      'RTL OVERRIDE': 0x202E,
+      'LTR OVERRIDE': 0x202D,
+      'EM DASH': 0x2014,
+      'TWO EM DASH': 0x2E3A,
+      'THREE EM DASH': 0x2E3B,
+      'EM SPACE': 0x3000,
+      'PINYIN v': 0x00FC,
+      'PINYIN a1': 0x0101,
+      'PINYIN a2': 0x00E1,
+      'PINYIN a3': 0x01CE,
+      'PINYIN a4': 0x00E0,
+      'PINYIN e1': 0x0113,
+      'PINYIN e2': 0x00E9,
+      'PINYIN e3': 0x011B,
+      'PINYIN e4': 0x00E8,
+      'PINYIN i1': 0x012B,
+      'PINYIN i2': 0x00ED,
+      'PINYIN i3': 0x01D0,
+      'PINYIN i4': 0x00EC,
+      'PINYIN o1': 0x014D,
+      'PINYIN o2': 0x00F3,
+      'PINYIN o3': 0x01D2,
+      'PINYIN o4': 0x00F2,
+      'PINYIN u1': 0x016B,
+      'PINYIN u2': 0x00FA,
+      'PINYIN u3': 0x01D4,
+      'PINYIN u4': 0x00F9,
+      'PINYIN v1 ü1': 0x01D6,
+      'PINYIN v2 ü2': 0x01D8,
+      'PINYIN v3 ü3': 0x01DA,
+      'PINYIN v4 ü4': 0x01DC,
+      'LEFT ANGLE BRACKET': 0x3008,
+      'RIGHT ANGLE BRACKET': 0x3009,
+      'LEFT CORNER BRACKET': 0x300C,
+      'RIGHT CORNER BRACKET': 0x300D,
+      'LEFT WHITE CORNER BRACKET': 0x300E,
+      'RIGHT WHITE CORNER BRACKET': 0x300F,
+      'LEFT BLACK LENTICULAR BRACKET': 0x3010,
+      'RIGHT BLACK LENTICULAR BRACKET': 0x3011,
+      'LEFT TORTOISE SHELL BRACKET': 0x3014,
+      'RIGHT TORTOISE SHELL BRACKET': 0x3015,
+      'LEFT WHITE LENTICULAR BRACKET': 0x3016,
+      'RIGHT WHITE LENTICULAR BRACKET': 0x3017,
+      'HALFWIDTH LEFT CORNER BRACKET': 0xFF62,
+      'HALFWIDTH RIGHT CORNER BRACKET': 0xFF63,
+      'VERTICAL LEFT ANGLE BRACKET': 0xFE3F,
+      'VERTICAL RIGHT ANGLE BRACKET': 0xFE40,
+      'VERTICAL LEFT CORNER BRACKET': 0xFE41,
+      'VERTICAL RIGHT CORNER BRACKET': 0xFE42,
+      'VERTICAL LEFT BLACK LENTICULAR BRACKET': 0xFE3B,
+      'VERTICAL RIGHT BLACK LENTICULAR BRACKET': 0xFE3C,
+      'VERTICAL LEFT TORTOISE SHELL BRACKET': 0xFE39,
+      'VERTICAL RIGHT TORTOISE SHELL BRACKET': 0xFE3A,
+      'VERTICAL LEFT WHITE LENTICULAR BRACKET': 0xFE17,
+      'VERTICAL RIGHT WHITE LENTICULAR BRACKET': 0xFE18,
+      'VERTICAL LEFT DOUBLE ANGLE BRACKET': 0xFE3D,
+      'VERTICAL RIGHT DOUBLE ANGLE BRACKET': 0xFE3E,
+      'LEFT WHITE CORNER BRACKET': 0xFE43,
+      'RIGHT WHITE CORNER BRACKET': 0xFE44,
+      'FACE WITH TEARS OF JOY EMOJI': 0x1F602,
+      'ROLLING ON THE FLOOR LAUGHING EMOJI': 0x1F923,
+      'FACE PALM EMOJI': 0x1F926,
+      'SPARKLES EMOJI': 0x2728,
+      'THUMBS UP EMOJI': 0x1F44D,
+      'OK HAND SIGN EMOJI': 0x1F44C,
+      'PERSON WITH FOLDED HANDS EMOJI': 0x1F64F,
+      'PARTY POPPER EMOJI': 0x1F389,
+      'LOUDLY CRYING FACE EMOJI': 0x1F62D,
+    }
+    const $ = sel => document.querySelector(sel)
+    new Vue({
+      el: '#app',
+      data () {
+        return {
+          search: '',
+          codes: { ...codes },
+        }
+      },
+      methods: {
+        copyCodePoint (cp) {
+          const el = document.createElement('textarea')
+          el.value = String.fromCodePoint(cp)
+          el.setAttribute('readonly', '')
+          el.style.position = 'absolute'
+          el.style.left = '-32767px'
+          document.body.appendChild(el)
+          const selected = document.getSelection().rangeCount > 0 ? document.getSelection().getRangeAt(0) : false
+          el.select()
+          document.execCommand('copy')
+          document.body.removeChild(el)
+          if (selected) {
+            document.getSelection().removeAllRanges()
+            document.getSelection().addRange(selected)
+          }
+        }
+      },
+      computed: {
+        codesToShow () {
+          if (!this.search) return { ...codes }
+          const filtered = {}
+          for (const name of Object.keys(codes).filter(name => name.toUpperCase().includes(this.search.toUpperCase()))) filtered[name] = codes[name]
+          return filtered
+        },
+      },
+    })
+  </script>
+</body>
+</html>
